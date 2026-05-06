@@ -34,9 +34,17 @@ export function TodoForm({ blocks }: { blocks: Block[] }) {
           const isExtraMile = Boolean(formData.get("isExtraMile"));
           const blockIdRaw = String(formData.get("blockId") ?? "");
           const blockId = blockIdRaw === "" ? null : blockIdRaw;
+          const priorityRaw = String(formData.get("priority") ?? "MEDIUM");
+          const priority = (["LOW", "MEDIUM", "HIGH", "URGENT"].includes(priorityRaw) ? priorityRaw : "MEDIUM") as
+            | "LOW"
+            | "MEDIUM"
+            | "HIGH"
+            | "URGENT";
+          const dueDateRaw = String(formData.get("dueDate") ?? "");
+          const dueDate = dueDateRaw ? new Date(`${dueDateRaw}T00:00:00`).toISOString() : null;
 
           startTransition(async () => {
-            await createTodo({ title, description, isExtraMile, blockId });
+            await createTodo({ title, description, isExtraMile, blockId, priority, dueDate });
           });
         }}
       >
@@ -60,6 +68,26 @@ export function TodoForm({ blocks }: { blocks: Block[] }) {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Prioridade</label>
+            <select
+              name="priority"
+              className="h-10 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+              defaultValue="MEDIUM"
+            >
+              <option value="LOW">Baixa</option>
+              <option value="MEDIUM">Media</option>
+              <option value="HIGH">Alta</option>
+              <option value="URGENT">Urgente</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Vencimento</label>
+            <Input type="date" name="dueDate" />
           </div>
         </div>
 

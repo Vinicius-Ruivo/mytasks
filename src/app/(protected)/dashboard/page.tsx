@@ -24,6 +24,8 @@ export default async function DashboardPage() {
       title: true,
       description: true,
       status: true,
+      priority: true,
+      dueDate: true,
       isExtraMile: true,
       block: {
         select: {

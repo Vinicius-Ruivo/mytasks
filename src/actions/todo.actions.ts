@@ -35,6 +35,8 @@ export async function createTodo(input: CreateTodoInput) {
       description: parsed.description ? sanitizeText(parsed.description) : null,
       isExtraMile: parsed.isExtraMile,
       blockId: parsed.blockId ?? null,
+      priority: parsed.priority,
+      dueDate: parsed.dueDate ? new Date(parsed.dueDate) : null,
       userId,
     },
   });
@@ -68,6 +70,8 @@ export async function updateTodo(input: UpdateTodoInput) {
       status: parsed.status,
       isExtraMile: parsed.isExtraMile,
       blockId: parsed.blockId ?? undefined,
+      priority: parsed.priority,
+      dueDate: parsed.dueDate !== undefined ? (parsed.dueDate ? new Date(parsed.dueDate) : null) : undefined,
     },
   });
 

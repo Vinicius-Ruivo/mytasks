@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
 import { createTodoNote, deleteTodo, updateTodo } from "@/actions/todo.actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ type Todo = {
   title: string;
   description: string | null;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  dueDate: string | Date | null;
   isExtraMile: boolean;
   block: { id: string; name: string } | null;
   notes: { id: string; content: string; createdAt: string | Date }[];
@@ -22,7 +25,47 @@ const statusLabel: Record<Todo["status"], string> = {
   COMPLETED: "Concluída",
 };
 
+const priorityLabel: Record<Todo["priority"], string> = {
+  LOW: "Baixa",
+  MEDIUM: "Media",
+  HIGH: "Alta",
+  URGENT: "Urgente",
+};
+
+const priorityOrder: Record<Todo["priority"], number> = {
+  URGENT: 0,
+  HIGH: 1,
+  MEDIUM: 2,
+  LOW: 3,
+};
+
 export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: string; name: string }[] }) {
+  const [view, setView] = useState<"TODAY" | "OVERDUE" | "UPCOMING" | "ALL">("TODAY");
+
+  const filteredTodos = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const list = todos.filter((todo) => {
+      if (!todo.dueDate) {
+        return view === "ALL";
+      }
+      const due = new Date(todo.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (view === "TODAY") return due.getTime() === today.getTime();
+      if (view === "OVERDUE") return due.getTime() < today.getTime() && todo.status !== "COMPLETED";
+      if (view === "UPCOMING") return due.getTime() > today.getTime();
+      return true;
+    });
+
+    return [...list].sort((a, b) => {
+      const dueA = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const dueB = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      if (dueA !== dueB) return dueA - dueB;
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+  }, [todos, view]);
+
   const handleToggle = async (todo: Todo) => {
     const nextStatus = todo.status === "COMPLETED" ? "PENDING" : "COMPLETED";
     await updateTodo({ id: todo.id, status: nextStatus });
@@ -44,7 +87,24 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
   return (
     <AnimatePresence mode="popLayout">
       <div className="grid gap-3">
-        {todos.map((todo) => (
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: "TODAY", label: "Hoje" },
+            { id: "OVERDUE", label: "Atrasadas" },
+            { id: "UPCOMING", label: "Proximas" },
+            { id: "ALL", label: "Todas" },
+          ].map((tab) => (
+            <Button
+              key={tab.id}
+              size="sm"
+              variant={view === tab.id ? "default" : "outline"}
+              onClick={() => setView(tab.id as "TODAY" | "OVERDUE" | "UPCOMING" | "ALL")}
+            >
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+        {filteredTodos.map((todo) => (
           <motion.div
             key={todo.id}
             layout
@@ -64,6 +124,10 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{todo.title}</p>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Prioridade: {priorityLabel[todo.priority]}
+                    {todo.dueDate ? ` | Vence em ${new Date(todo.dueDate).toLocaleDateString("pt-BR")}` : ""}
+                  </p>
                   {todo.block ? <p className="text-xs text-indigo-500 mt-1">Bloco: {todo.block.name}</p> : null}
                   {todo.description ? (
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{todo.description}</p>
@@ -82,6 +146,21 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 >
                   Extra mile
                 </Button>
+                <select
+                  className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
+                  defaultValue={todo.priority}
+                  onChange={(e) =>
+                    void updateTodo({
+                      id: todo.id,
+                      priority: e.target.value as "LOW" | "MEDIUM" | "HIGH" | "URGENT",
+                    })
+                  }
+                >
+                  <option value="LOW">Baixa</option>
+                  <option value="MEDIUM">Media</option>
+                  <option value="HIGH">Alta</option>
+                  <option value="URGENT">Urgente</option>
+                </select>
                 <select
                   className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
                   defaultValue={todo.block?.id ?? ""}

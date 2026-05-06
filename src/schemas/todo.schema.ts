@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 export const todoStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]);
+export const todoPrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
 export const createTodoSchema = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).optional().nullable(),
   isExtraMile: z.boolean().default(false),
   blockId: z.string().cuid().optional().nullable(),
+  priority: todoPrioritySchema.default("MEDIUM"),
+  dueDate: z.string().datetime().optional().nullable(),
 });
 
 export const updateTodoSchema = z.object({
@@ -16,6 +19,8 @@ export const updateTodoSchema = z.object({
   status: todoStatusSchema.optional(),
   isExtraMile: z.boolean().optional(),
   blockId: z.string().cuid().optional().nullable(),
+  priority: todoPrioritySchema.optional(),
+  dueDate: z.string().datetime().optional().nullable(),
 });
 
 export const deleteTodoSchema = z.object({
