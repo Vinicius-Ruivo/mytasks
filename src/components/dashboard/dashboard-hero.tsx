@@ -13,7 +13,6 @@ type Metrics = {
 };
 
 type Props = {
-  displayName: string;
   metrics: Metrics;
 };
 
@@ -25,7 +24,7 @@ const metricCards = [
   { key: "extraMile", label: "Extra mile", color: "border-l-violet-500" },
 ] as const;
 
-export function DashboardHero({ displayName, metrics }: Props) {
+export function DashboardHero({ metrics }: Props) {
   return (
     <>
       <motion.header
@@ -35,8 +34,7 @@ export function DashboardHero({ displayName, metrics }: Props) {
         className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80"
       >
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">MyTasks Dashboard</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">Visao geral da sua rotina - {displayName}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">MyTasks</h1>
         </div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <LogoutButton />

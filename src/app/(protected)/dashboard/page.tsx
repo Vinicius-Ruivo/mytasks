@@ -73,7 +73,6 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-4 md:p-6">
       <DashboardHero
-        displayName={userProfile?.nickname ?? userProfile?.name ?? userProfile?.email ?? session.user.email ?? "Usuario"}
         metrics={metrics}
       />
 
