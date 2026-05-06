@@ -5,10 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { getAuthSession } from "@/lib/auth";
 import { sanitizeText } from "@/lib/security";
 import {
+  createChecklistItemSchema,
   createBlockSchema,
+  createFromTemplateSchema,
+  createSubtaskSchema,
+  createTemplateSchema,
   createTodoNoteSchema,
   createTodoSchema,
   deleteTodoSchema,
+  toggleChecklistItemSchema,
   updateTodoSchema,
   type CreateTodoInput,
   type UpdateTodoInput,
@@ -41,6 +46,27 @@ export async function createTodo(input: CreateTodoInput) {
     },
   });
 
+  revalidatePath("/dashboard");
+}
+
+export async function createSubtask(input: { parentId: string; title: string }) {
+  const userId = await requireUserId();
+  const parsed = createSubtaskSchema.parse(input);
+
+  const parent = await prisma.todo.findUnique({
+    where: { id: parsed.parentId },
+    select: { userId: true, blockId: true },
+  });
+  if (!parent || parent.userId !== userId) throw new Error("Forbidden");
+
+  await prisma.todo.create({
+    data: {
+      title: sanitizeText(parsed.title),
+      userId,
+      parentId: parsed.parentId,
+      blockId: parent.blockId,
+    },
+  });
   revalidatePath("/dashboard");
 }
 
@@ -114,6 +140,69 @@ export async function createTodoNote(input: { todoId: string; content: string })
     },
   });
 
+  revalidatePath("/dashboard");
+}
+
+export async function createChecklistItem(input: { todoId: string; content: string }) {
+  const userId = await requireUserId();
+  const parsed = createChecklistItemSchema.parse(input);
+  const todo = await prisma.todo.findUnique({ where: { id: parsed.todoId }, select: { userId: true } });
+  if (!todo || todo.userId !== userId) throw new Error("Forbidden");
+
+  await prisma.todoChecklistItem.create({
+    data: { todoId: parsed.todoId, userId, content: sanitizeText(parsed.content) },
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function toggleChecklistItem(input: { id: string; done: boolean }) {
+  const userId = await requireUserId();
+  const parsed = toggleChecklistItemSchema.parse(input);
+  await prisma.todoChecklistItem.updateMany({
+    where: { id: parsed.id, userId },
+    data: { done: parsed.done },
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function createTemplate(input: {
+  name: string;
+  title: string;
+  description?: string | null;
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+}) {
+  const userId = await requireUserId();
+  const parsed = createTemplateSchema.parse(input);
+  await prisma.taskTemplate.create({
+    data: {
+      userId,
+      name: sanitizeText(parsed.name),
+      title: sanitizeText(parsed.title),
+      description: parsed.description ? sanitizeText(parsed.description) : null,
+      priority: parsed.priority,
+    },
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function createTodoFromTemplate(input: { templateId: string; blockId?: string | null }) {
+  const userId = await requireUserId();
+  const parsed = createFromTemplateSchema.parse(input);
+  const template = await prisma.taskTemplate.findUnique({
+    where: { id: parsed.templateId },
+    select: { userId: true, title: true, description: true, priority: true },
+  });
+  if (!template || template.userId !== userId) throw new Error("Forbidden");
+
+  await prisma.todo.create({
+    data: {
+      userId,
+      title: template.title,
+      description: template.description,
+      priority: template.priority,
+      blockId: parsed.blockId ?? null,
+    },
+  });
   revalidatePath("/dashboard");
 }
 

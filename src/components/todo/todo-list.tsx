@@ -2,7 +2,14 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { createTodoNote, deleteTodo, updateTodo } from "@/actions/todo.actions";
+import {
+  createChecklistItem,
+  createSubtask,
+  createTodoNote,
+  deleteTodo,
+  toggleChecklistItem,
+  updateTodo,
+} from "@/actions/todo.actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,6 +24,8 @@ type Todo = {
   isExtraMile: boolean;
   block: { id: string; name: string } | null;
   notes: { id: string; content: string; createdAt: string | Date }[];
+  subtasks: { id: string; title: string; status: "PENDING" | "IN_PROGRESS" | "COMPLETED" }[];
+  checklist: { id: string; content: string; done: boolean }[];
 };
 
 const statusLabel: Record<Todo["status"], string> = {
@@ -176,6 +185,91 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 <Button size="sm" variant="destructive" onClick={() => void deleteTodo({ id: todo.id })}>
                   Excluir
                 </Button>
+              </div>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Subtarefas</p>
+                  <form
+                    className="mb-2 flex gap-2"
+                    action={(formData) => {
+                      const title = String(formData.get(`subtask-${todo.id}`) ?? "");
+                      void createSubtask({ parentId: todo.id, title });
+                    }}
+                  >
+                    <input
+                      name={`subtask-${todo.id}`}
+                      className="h-8 w-full rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
+                      placeholder="Nova subtarefa..."
+                      required
+                      maxLength={120}
+                    />
+                    <Button size="sm" variant="outline" type="submit">
+                      Add
+                    </Button>
+                  </form>
+                  <div className="space-y-2">
+                    {todo.subtasks.length === 0 ? (
+                      <p className="text-xs text-zinc-500">Sem subtarefas.</p>
+                    ) : (
+                      todo.subtasks.map((subtask) => (
+                        <label key={subtask.id} className="flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={subtask.status === "COMPLETED"}
+                            onChange={(e) =>
+                              void updateTodo({
+                                id: subtask.id,
+                                status: e.target.checked ? "COMPLETED" : "PENDING",
+                              })
+                            }
+                          />
+                          <span className={subtask.status === "COMPLETED" ? "line-through text-zinc-500" : ""}>
+                            {subtask.title}
+                          </span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Checklist</p>
+                  <form
+                    className="mb-2 flex gap-2"
+                    action={(formData) => {
+                      const content = String(formData.get(`check-${todo.id}`) ?? "");
+                      void createChecklistItem({ todoId: todo.id, content });
+                    }}
+                  >
+                    <input
+                      name={`check-${todo.id}`}
+                      className="h-8 w-full rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
+                      placeholder="Novo item..."
+                      required
+                      maxLength={200}
+                    />
+                    <Button size="sm" variant="outline" type="submit">
+                      Add
+                    </Button>
+                  </form>
+                  <div className="space-y-2">
+                    {todo.checklist.length === 0 ? (
+                      <p className="text-xs text-zinc-500">Checklist vazio.</p>
+                    ) : (
+                      todo.checklist.map((item) => (
+                        <label key={item.id} className="flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={item.done}
+                            onChange={(e) => void toggleChecklistItem({ id: item.id, done: e.target.checked })}
+                          />
+                          <span className={item.done ? "line-through text-zinc-500" : ""}>{item.content}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">

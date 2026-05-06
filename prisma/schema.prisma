@@ -37,6 +37,8 @@ model User {
   todos         Todo[]
   blocks        LifeBlock[]
   notes         TodoNote[]
+  checklistItems TodoChecklistItem[]
+  templates     TaskTemplate[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -92,9 +94,13 @@ model Todo {
   isExtraMile Boolean    @default(false)
   userId      String
   blockId     String?
+  parentId    String?
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   block       LifeBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  parent      Todo?      @relation("TodoSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks    Todo[]     @relation("TodoSubtasks")
   notes       TodoNote[]
+  checklist   TodoChecklistItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -103,6 +109,7 @@ model Todo {
   @@index([blockId])
   @@index([dueDate])
   @@index([priority])
+  @@index([parentId])
 }
 
 model TodoNote {
@@ -130,4 +137,32 @@ model LifeBlock {
 
   @@index([userId])
   @@unique([userId, name])
+}
+
+model TodoChecklistItem {
+  id        String   @id @default(cuid())
+  content   String
+  done      Boolean  @default(false)
+  todoId    String
+  userId    String
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([todoId])
+  @@index([userId])
+}
+
+model TaskTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  description String?
+  priority    TodoPriority @default(MEDIUM)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }

@@ -37,5 +37,32 @@ export const createTodoNoteSchema = z.object({
   content: z.string().trim().min(1).max(1200),
 });
 
+export const createSubtaskSchema = z.object({
+  parentId: z.string().cuid(),
+  title: z.string().trim().min(1).max(120),
+});
+
+export const createChecklistItemSchema = z.object({
+  todoId: z.string().cuid(),
+  content: z.string().trim().min(1).max(200),
+});
+
+export const toggleChecklistItemSchema = z.object({
+  id: z.string().cuid(),
+  done: z.boolean(),
+});
+
+export const createTemplateSchema = z.object({
+  name: z.string().trim().min(1).max(40),
+  title: z.string().trim().min(1).max(120),
+  description: z.string().trim().max(500).optional().nullable(),
+  priority: todoPrioritySchema.default("MEDIUM"),
+});
+
+export const createFromTemplateSchema = z.object({
+  templateId: z.string().cuid(),
+  blockId: z.string().cuid().optional().nullable(),
+});
+
 export type CreateTodoInput = z.infer<typeof createTodoSchema>;
 export type UpdateTodoInput = z.infer<typeof updateTodoSchema>;

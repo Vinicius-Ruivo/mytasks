@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   }
 
   const todos = await prisma.todo.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, parentId: null },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -41,6 +41,22 @@ export default async function DashboardPage() {
           createdAt: true,
         },
       },
+      subtasks: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+        },
+      },
+      checklist: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          content: true,
+          done: true,
+        },
+      },
     },
   });
 
@@ -60,6 +76,12 @@ export default async function DashboardPage() {
       name: true,
       email: true,
     },
+  });
+
+  const templates = await prisma.taskTemplate.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, name: true },
   });
 
   const metrics = {
@@ -103,7 +125,7 @@ export default async function DashboardPage() {
         <section className="grid gap-4 md:grid-cols-[1.2fr_2fr]">
           <Card>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Criacao rapida</h2>
-            <TodoForm blocks={blocks} />
+            <TodoForm blocks={blocks} templates={templates} />
           </Card>
 
           <Card>
