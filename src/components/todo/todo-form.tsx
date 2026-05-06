@@ -167,14 +167,26 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           const name = String(formData.get("templateName") ?? "");
           const title = String(formData.get("templateTitle") ?? "");
           const description = String(formData.get("templateDescription") ?? "");
+          const subtasksRaw = String(formData.get("templateSubtasks") ?? "");
+          const checklistRaw = String(formData.get("templateChecklist") ?? "");
           const priorityRaw = String(formData.get("templatePriority") ?? "MEDIUM");
           const priority = (["LOW", "MEDIUM", "HIGH", "URGENT"].includes(priorityRaw) ? priorityRaw : "MEDIUM") as
             | "LOW"
             | "MEDIUM"
             | "HIGH"
             | "URGENT";
+          const subtasks = subtasksRaw
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .slice(0, 30);
+          const checklist = checklistRaw
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .slice(0, 40);
           startTransition(async () => {
-            await createTemplate({ name, title, description: description || null, priority });
+            await createTemplate({ name, title, description: description || null, priority, subtasks, checklist });
           });
         }}
       >
@@ -195,6 +207,20 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
             <option value="HIGH">Alta</option>
             <option value="URGENT">Urgente</option>
           </select>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <textarea
+            name="templateSubtasks"
+            className="min-h-24 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+            placeholder={"Subtarefas padrao (1 por linha)\nEx:\nPreparar contexto\nExecutar foco de 60min"}
+            maxLength={4000}
+          />
+          <textarea
+            name="templateChecklist"
+            className="min-h-24 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+            placeholder={"Checklist padrao (1 por linha)\nEx:\nAmbiente pronto\nEntregavel revisado"}
+            maxLength={4000}
+          />
         </div>
         <Button type="submit" variant="secondary">
           Salvar template

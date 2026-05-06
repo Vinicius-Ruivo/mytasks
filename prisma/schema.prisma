@@ -161,8 +161,32 @@ model TaskTemplate {
   priority    TodoPriority @default(MEDIUM)
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtasks    TaskTemplateSubtask[]
+  checklist   TaskTemplateChecklistItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+}
+
+model TaskTemplateSubtask {
+  id         String   @id @default(cuid())
+  content    String
+  sortOrder  Int
+  templateId String
+  template   TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([templateId])
+}
+
+model TaskTemplateChecklistItem {
+  id         String   @id @default(cuid())
+  content    String
+  sortOrder  Int
+  templateId String
+  template   TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([templateId])
 }

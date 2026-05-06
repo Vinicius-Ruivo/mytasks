@@ -57,6 +57,8 @@ export const createTemplateSchema = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).optional().nullable(),
   priority: todoPrioritySchema.default("MEDIUM"),
+  subtasks: z.array(z.string().trim().min(1).max(120)).max(30).optional().default([]),
+  checklist: z.array(z.string().trim().min(1).max(200)).max(40).optional().default([]),
 });
 
 export const createFromTemplateSchema = z.object({

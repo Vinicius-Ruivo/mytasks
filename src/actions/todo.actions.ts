@@ -170,9 +170,14 @@ export async function createTemplate(input: {
   title: string;
   description?: string | null;
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  subtasks?: string[];
+  checklist?: string[];
 }) {
   const userId = await requireUserId();
   const parsed = createTemplateSchema.parse(input);
+  const sanitizedSubtasks = parsed.subtasks.map((item) => sanitizeText(item)).filter(Boolean);
+  const sanitizedChecklist = parsed.checklist.map((item) => sanitizeText(item)).filter(Boolean);
+
   await prisma.taskTemplate.create({
     data: {
       userId,
@@ -180,6 +185,12 @@ export async function createTemplate(input: {
       title: sanitizeText(parsed.title),
       description: parsed.description ? sanitizeText(parsed.description) : null,
       priority: parsed.priority,
+      subtasks: {
+        create: sanitizedSubtasks.map((content, index) => ({ content, sortOrder: index })),
+      },
+      checklist: {
+        create: sanitizedChecklist.map((content, index) => ({ content, sortOrder: index })),
+      },
     },
   });
   revalidatePath("/dashboard");
@@ -190,7 +201,14 @@ export async function createTodoFromTemplate(input: { templateId: string; blockI
   const parsed = createFromTemplateSchema.parse(input);
   const template = await prisma.taskTemplate.findUnique({
     where: { id: parsed.templateId },
-    select: { userId: true, title: true, description: true, priority: true },
+    select: {
+      userId: true,
+      title: true,
+      description: true,
+      priority: true,
+      subtasks: { orderBy: { sortOrder: "asc" }, select: { content: true } },
+      checklist: { orderBy: { sortOrder: "asc" }, select: { content: true } },
+    },
   });
   if (!template || template.userId !== userId) throw new Error("Forbidden");
 
@@ -201,6 +219,19 @@ export async function createTodoFromTemplate(input: { templateId: string; blockI
       description: template.description,
       priority: template.priority,
       blockId: parsed.blockId ?? null,
+      subtasks: {
+        create: template.subtasks.map((subtask) => ({
+          title: subtask.content,
+          userId,
+          blockId: parsed.blockId ?? null,
+        })),
+      },
+      checklist: {
+        create: template.checklist.map((item) => ({
+          content: item.content,
+          userId,
+        })),
+      },
     },
   });
   revalidatePath("/dashboard");
