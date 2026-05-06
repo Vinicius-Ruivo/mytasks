@@ -30,6 +30,14 @@ export default async function DashboardPage() {
           name: true,
         },
       },
+      notes: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+        },
+      },
     },
   });
 

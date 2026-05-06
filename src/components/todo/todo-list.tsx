@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { deleteTodo, updateTodo } from "@/actions/todo.actions";
+import { createTodoNote, deleteTodo, updateTodo } from "@/actions/todo.actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ type Todo = {
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   isExtraMile: boolean;
   block: { id: string; name: string } | null;
+  notes: { id: string; content: string; createdAt: string | Date }[];
 };
 
 const statusLabel: Record<Todo["status"], string> = {
@@ -96,6 +97,43 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 <Button size="sm" variant="destructive" onClick={() => void deleteTodo({ id: todo.id })}>
                   Excluir
                 </Button>
+              </div>
+
+              <div className="mt-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Anotacoes</p>
+                <form
+                  className="mb-2 flex gap-2"
+                  action={(formData) => {
+                    const content = String(formData.get(`note-${todo.id}`) ?? "");
+                    void createTodoNote({ todoId: todo.id, content });
+                  }}
+                >
+                  <input
+                    name={`note-${todo.id}`}
+                    className="h-8 w-full rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
+                    placeholder="Adicionar detalhe, contexto, insight..."
+                    required
+                    maxLength={1200}
+                  />
+                  <Button size="sm" variant="outline" type="submit">
+                    Salvar
+                  </Button>
+                </form>
+
+                <div className="space-y-2">
+                  {todo.notes.length === 0 ? (
+                    <p className="text-xs text-zinc-500">Sem anotacoes ainda.</p>
+                  ) : (
+                    todo.notes.map((note) => (
+                      <div key={note.id} className="rounded-md bg-zinc-100/80 p-2 text-xs dark:bg-zinc-800/70">
+                        <p className="text-zinc-700 dark:text-zinc-200">{note.content}</p>
+                        <p className="mt-1 text-[11px] text-zinc-500">
+                          {new Date(note.createdAt).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </Card>
           </motion.div>

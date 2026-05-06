@@ -27,5 +27,10 @@ export const createBlockSchema = z.object({
   color: z.string().trim().max(20).optional().nullable(),
 });
 
+export const createTodoNoteSchema = z.object({
+  todoId: z.string().cuid(),
+  content: z.string().trim().min(1).max(1200),
+});
+
 export type CreateTodoInput = z.infer<typeof createTodoSchema>;
 export type UpdateTodoInput = z.infer<typeof updateTodoSchema>;

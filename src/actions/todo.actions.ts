@@ -6,6 +6,7 @@ import { getAuthSession } from "@/lib/auth";
 import { sanitizeText } from "@/lib/security";
 import {
   createBlockSchema,
+  createTodoNoteSchema,
   createTodoSchema,
   deleteTodoSchema,
   updateTodoSchema,
@@ -82,6 +83,30 @@ export async function createLifeBlock(input: { name: string; color?: string | nu
       name: sanitizeText(parsed.name),
       color: parsed.color ? sanitizeText(parsed.color) : null,
       userId,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
+export async function createTodoNote(input: { todoId: string; content: string }) {
+  const userId = await requireUserId();
+  const parsed = createTodoNoteSchema.parse(input);
+
+  const todo = await prisma.todo.findUnique({
+    where: { id: parsed.todoId },
+    select: { userId: true },
+  });
+
+  if (!todo || todo.userId !== userId) {
+    throw new Error("Forbidden");
+  }
+
+  await prisma.todoNote.create({
+    data: {
+      todoId: parsed.todoId,
+      userId,
+      content: sanitizeText(parsed.content),
     },
   });
 
