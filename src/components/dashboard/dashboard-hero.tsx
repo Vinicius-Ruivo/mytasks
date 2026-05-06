@@ -37,7 +37,7 @@ export function DashboardHero({ metrics }: Props) {
         </div>
       </motion.header>
 
-      <section className="grid gap-3 md:grid-cols-5">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {metricCards.map((item, index) => (
           <motion.div
             key={item.key}
@@ -47,8 +47,8 @@ export function DashboardHero({ metrics }: Props) {
             whileHover={{ y: -2 }}
           >
             <Card className={`border-l-4 ${item.color}`}>
-              <p className="text-xs uppercase text-zinc-500">{item.label}</p>
-              <p className="text-2xl font-bold">{metrics[item.key]}</p>
+              <p className="text-[11px] uppercase text-zinc-500 sm:text-xs">{item.label}</p>
+              <p className="text-xl font-bold sm:text-2xl">{metrics[item.key]}</p>
             </Card>
           </motion.div>
         ))}

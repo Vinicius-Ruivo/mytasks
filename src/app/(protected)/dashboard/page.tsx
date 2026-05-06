@@ -8,6 +8,7 @@ import { FocusMap } from "@/components/dashboard/focus-map";
 import { NicknameOnboarding } from "@/components/dashboard/nickname-onboarding";
 import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { DashboardMobileControls } from "@/components/dashboard/dashboard-mobile-controls";
 
 export default async function DashboardPage() {
   const session = await getAuthSession();
@@ -80,13 +81,17 @@ export default async function DashboardPage() {
     .sort((a, b) => b.completed - a.completed || b.total - a.total);
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl">
+    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col md:flex-row">
       <DashboardSidebar
         displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
         email={userProfile?.email ?? session.user.email ?? "sem-email"}
       />
 
-      <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-6">
+      <main className="flex min-h-screen w-full flex-col gap-4 p-3 sm:p-4 md:p-6">
+        <DashboardMobileControls
+          displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
+          email={userProfile?.email ?? session.user.email ?? "sem-email"}
+        />
         <DashboardHero metrics={metrics} />
 
         {!userProfile?.nickname ? <NicknameOnboarding /> : null}

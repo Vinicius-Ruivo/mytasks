@@ -71,7 +71,7 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 </div>
                 <Badge>{statusLabel[todo.status]}</Badge>
               </div>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Button size="sm" variant="secondary" onClick={() => void handleToggle(todo)}>
                   {todo.status === "COMPLETED" ? "Reabrir" : "Concluir"}
                 </Button>
