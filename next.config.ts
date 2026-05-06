@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import withPWAInit from "next-pwa";
-import path from "node:path";
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -10,7 +9,6 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  outputFileTracingRoot: path.join(__dirname, "../../.."),
   async headers() {
     return [
       {
