@@ -1,0 +1,82 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { getAuthSession } from "@/lib/auth";
+import { sanitizeText } from "@/lib/security";
+import {
+  createTodoSchema,
+  deleteTodoSchema,
+  updateTodoSchema,
+  type CreateTodoInput,
+  type UpdateTodoInput,
+} from "@/schemas/todo.schema";
+
+async function requireUserId() {
+  const session = await getAuthSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return userId;
+}
+
+export async function createTodo(input: CreateTodoInput) {
+  const userId = await requireUserId();
+  const parsed = createTodoSchema.parse(input);
+
+  await prisma.todo.create({
+    data: {
+      title: sanitizeText(parsed.title),
+      description: parsed.description ? sanitizeText(parsed.description) : null,
+      isExtraMile: parsed.isExtraMile,
+      userId,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
+export async function updateTodo(input: UpdateTodoInput) {
+  const userId = await requireUserId();
+  const parsed = updateTodoSchema.parse(input);
+
+  const todo = await prisma.todo.findUnique({
+    where: { id: parsed.id },
+    select: { userId: true },
+  });
+
+  if (!todo || todo.userId !== userId) {
+    throw new Error("Forbidden");
+  }
+
+  await prisma.todo.updateMany({
+    where: { id: parsed.id, userId },
+    data: {
+      title: parsed.title ? sanitizeText(parsed.title) : undefined,
+      description:
+        parsed.description !== undefined
+          ? parsed.description
+            ? sanitizeText(parsed.description)
+            : null
+          : undefined,
+      status: parsed.status,
+      isExtraMile: parsed.isExtraMile,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
+export async function deleteTodo(input: { id: string }) {
+  const userId = await requireUserId();
+  const parsed = deleteTodoSchema.parse(input);
+
+  await prisma.todo.deleteMany({
+    where: { id: parsed.id, userId },
+  });
+
+  revalidatePath("/dashboard");
+}
