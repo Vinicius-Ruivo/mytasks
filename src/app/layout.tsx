@@ -17,6 +17,12 @@ export const metadata: Metadata = {
   title: "MyTasks PWA",
   description: "Gerenciador de tarefas seguro e de alta performance",
   manifest: "/manifest.json",
+  applicationName: "MyTasks",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MyTasks",
+  },
 };
 
 export default function RootLayout({

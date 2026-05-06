@@ -6,6 +6,7 @@ import { LayoutDashboard, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Button } from "@/components/ui/button";
+import { InstallAppButton } from "@/components/dashboard/install-app-button";
 
 type Props = {
   displayName: string;
@@ -72,6 +73,11 @@ export function DashboardSidebar({ displayName, email }: Props) {
                     Escuro
                   </Button>
                 </div>
+              </div>
+
+              <div className="mt-3">
+                <p className="mb-2 text-xs uppercase text-zinc-500">Aplicativo</p>
+                <InstallAppButton />
               </div>
 
               <div className="mt-3">
