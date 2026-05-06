@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,8 +23,14 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md space-y-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      <motion.div
+        className="pointer-events-none absolute -top-24 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-indigo-500/20 blur-3xl"
+        animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.08, 1] }}
+        transition={{ duration: 6, repeat: Infinity }}
+      />
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <Card className="w-full max-w-md space-y-4">
         <h1 className="text-xl font-semibold">Entrar no MyTasks</h1>
         <form onSubmit={onMagicLink} className="space-y-3">
           <Input
@@ -41,7 +48,8 @@ export default function LoginPage() {
           Continuar com Google
         </Button>
         {message ? <p className="text-sm text-zinc-600 dark:text-zinc-300">{message}</p> : null}
-      </Card>
+        </Card>
+      </motion.div>
     </main>
   );
 }

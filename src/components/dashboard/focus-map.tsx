@@ -52,6 +52,7 @@ export function FocusMap({ items }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: index * 0.03 }}
                 style={{ gridColumn: `span ${colSpan} / span ${colSpan}` }}
+                whileHover={{ scale: 1.01 }}
               >
                 <div className="h-full rounded-xl border border-zinc-200 bg-gradient-to-br from-indigo-500/10 via-sky-500/10 to-violet-500/10 p-4 dark:border-zinc-800">
                   <p className="text-sm font-semibold">{item.blockName}</p>

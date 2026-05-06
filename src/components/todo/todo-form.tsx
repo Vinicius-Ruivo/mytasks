@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useFormStatus } from "react-dom";
+import { motion } from "framer-motion";
 import { createLifeBlock, createTodo } from "@/actions/todo.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ export function TodoForm({ blocks }: { blocks: Block[] }) {
   const [, startTransition] = useTransition();
 
   return (
-    <div>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
       <form
         className="flex flex-col gap-2 md:flex-row"
         action={(formData) => {
@@ -59,8 +60,11 @@ export function TodoForm({ blocks }: { blocks: Block[] }) {
         </label>
         <SubmitButton />
       </form>
-      <form
+      <motion.form
         className="mt-3 flex gap-2"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, delay: 0.05 }}
         action={(formData) => {
           const name = String(formData.get("blockName") ?? "");
           const color = String(formData.get("blockColor") ?? "");
@@ -74,7 +78,7 @@ export function TodoForm({ blocks }: { blocks: Block[] }) {
         <Button type="submit" variant="secondary">
           Criar bloco
         </Button>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }
