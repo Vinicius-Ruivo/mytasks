@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthSession } from "@/lib/auth";
 import { sanitizeText } from "@/lib/security";
 import {
+  createBlockSchema,
   createTodoSchema,
   deleteTodoSchema,
   updateTodoSchema,
@@ -32,6 +33,7 @@ export async function createTodo(input: CreateTodoInput) {
       title: sanitizeText(parsed.title),
       description: parsed.description ? sanitizeText(parsed.description) : null,
       isExtraMile: parsed.isExtraMile,
+      blockId: parsed.blockId ?? null,
       userId,
     },
   });
@@ -64,6 +66,22 @@ export async function updateTodo(input: UpdateTodoInput) {
           : undefined,
       status: parsed.status,
       isExtraMile: parsed.isExtraMile,
+      blockId: parsed.blockId ?? undefined,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
+export async function createLifeBlock(input: { name: string; color?: string | null }) {
+  const userId = await requireUserId();
+  const parsed = createBlockSchema.parse(input);
+
+  await prisma.lifeBlock.create({
+    data: {
+      name: sanitizeText(parsed.name),
+      color: parsed.color ? sanitizeText(parsed.color) : null,
+      userId,
     },
   });
 

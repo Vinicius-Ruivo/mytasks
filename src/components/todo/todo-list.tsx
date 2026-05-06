@@ -12,6 +12,7 @@ type Todo = {
   description: string | null;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   isExtraMile: boolean;
+  block: { id: string; name: string } | null;
 };
 
 const statusLabel: Record<Todo["status"], string> = {
@@ -20,7 +21,7 @@ const statusLabel: Record<Todo["status"], string> = {
   COMPLETED: "Concluída",
 };
 
-export function TodoList({ todos }: { todos: Todo[] }) {
+export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: string; name: string }[] }) {
   const handleToggle = async (todo: Todo) => {
     const nextStatus = todo.status === "COMPLETED" ? "PENDING" : "COMPLETED";
     await updateTodo({ id: todo.id, status: nextStatus });
@@ -61,6 +62,7 @@ export function TodoList({ todos }: { todos: Todo[] }) {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{todo.title}</p>
+                  {todo.block ? <p className="text-xs text-indigo-500 mt-1">Bloco: {todo.block.name}</p> : null}
                   {todo.description ? (
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{todo.description}</p>
                   ) : null}
@@ -78,6 +80,18 @@ export function TodoList({ todos }: { todos: Todo[] }) {
                 >
                   Extra mile
                 </Button>
+                <select
+                  className="h-8 rounded-md border border-zinc-200 bg-white px-2 text-xs dark:border-zinc-800 dark:bg-zinc-950"
+                  defaultValue={todo.block?.id ?? ""}
+                  onChange={(e) => void updateTodo({ id: todo.id, blockId: e.target.value || null })}
+                >
+                  <option value="">Sem bloco</option>
+                  {blocks.map((block) => (
+                    <option key={block.id} value={block.id}>
+                      {block.name}
+                    </option>
+                  ))}
+                </select>
                 <Button size="sm" variant="destructive" onClick={() => void deleteTodo({ id: todo.id })}>
                   Excluir
                 </Button>

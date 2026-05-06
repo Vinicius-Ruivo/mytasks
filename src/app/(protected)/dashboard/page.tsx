@@ -20,6 +20,21 @@ export default async function DashboardPage() {
       description: true,
       status: true,
       isExtraMile: true,
+      block: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  const blocks = await prisma.lifeBlock.findMany({
+    where: { userId: session.user.id },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
     },
   });
 
@@ -32,8 +47,8 @@ export default async function DashboardPage() {
         </div>
         <LogoutButton />
       </header>
-      <TodoForm />
-      <TodoList todos={todos} />
+      <TodoForm blocks={blocks} />
+      <TodoList todos={todos} blocks={blocks} />
     </main>
   );
 }

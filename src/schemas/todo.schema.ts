@@ -6,6 +6,7 @@ export const createTodoSchema = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).optional().nullable(),
   isExtraMile: z.boolean().default(false),
+  blockId: z.string().cuid().optional().nullable(),
 });
 
 export const updateTodoSchema = z.object({
@@ -14,10 +15,16 @@ export const updateTodoSchema = z.object({
   description: z.string().trim().max(500).optional().nullable(),
   status: todoStatusSchema.optional(),
   isExtraMile: z.boolean().optional(),
+  blockId: z.string().cuid().optional().nullable(),
 });
 
 export const deleteTodoSchema = z.object({
   id: z.string().cuid(),
+});
+
+export const createBlockSchema = z.object({
+  name: z.string().trim().min(1).max(40),
+  color: z.string().trim().max(20).optional().nullable(),
 });
 
 export type CreateTodoInput = z.infer<typeof createTodoSchema>;
