@@ -5,6 +5,7 @@ import { TodoForm } from "@/components/todo/todo-form";
 import { TodoList } from "@/components/todo/todo-list";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
+import { FocusMap } from "@/components/dashboard/focus-map";
 
 export default async function DashboardPage() {
   const session = await getAuthSession();
@@ -47,6 +48,18 @@ export default async function DashboardPage() {
     extraMile: todos.filter((todo) => todo.isExtraMile).length,
   };
 
+  const focusMapItems = blocks
+    .map((block) => {
+      const blockTodos = todos.filter((todo) => todo.block?.id === block.id);
+      return {
+        blockId: block.id,
+        blockName: block.name,
+        total: blockTodos.length,
+        completed: blockTodos.filter((todo) => todo.status === "COMPLETED").length,
+      };
+    })
+    .sort((a, b) => b.completed - a.completed || b.total - a.total);
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-4 md:p-6">
       <header className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
@@ -79,6 +92,8 @@ export default async function DashboardPage() {
           <p className="text-2xl font-bold">{metrics.extraMile}</p>
         </Card>
       </section>
+
+      <FocusMap items={focusMapItems} />
 
       <section className="grid gap-4 md:grid-cols-[1.2fr_2fr]">
         <Card>
