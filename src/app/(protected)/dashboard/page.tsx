@@ -6,6 +6,7 @@ import { TodoList } from "@/components/todo/todo-list";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { FocusMap } from "@/components/dashboard/focus-map";
+import { NicknameOnboarding } from "@/components/dashboard/nickname-onboarding";
 
 export default async function DashboardPage() {
   const session = await getAuthSession();
@@ -40,6 +41,15 @@ export default async function DashboardPage() {
     },
   });
 
+  const userProfile = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      nickname: true,
+      name: true,
+      email: true,
+    },
+  });
+
   const metrics = {
     total: todos.length,
     pending: todos.filter((todo) => todo.status === "PENDING").length,
@@ -65,10 +75,15 @@ export default async function DashboardPage() {
       <header className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">MyTasks Dashboard</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">Visao geral da sua rotina - {session.user.email}</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            Visao geral da sua rotina -{" "}
+            {userProfile?.nickname ?? userProfile?.name ?? userProfile?.email ?? session.user.email}
+          </p>
         </div>
         <LogoutButton />
       </header>
+
+      {!userProfile?.nickname ? <NicknameOnboarding /> : null}
 
       <section className="grid gap-3 md:grid-cols-5">
         <Card className="border-l-4 border-l-indigo-500">
