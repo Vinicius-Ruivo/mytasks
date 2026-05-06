@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { FocusMap } from "@/components/dashboard/focus-map";
 import { NicknameOnboarding } from "@/components/dashboard/nickname-onboarding";
 import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 
 export default async function DashboardPage() {
   const session = await getAuthSession();
@@ -71,38 +72,43 @@ export default async function DashboardPage() {
     .sort((a, b) => b.completed - a.completed || b.total - a.total);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-4 md:p-6">
-      <DashboardHero
-        metrics={metrics}
+    <div className="mx-auto flex min-h-screen w-full max-w-7xl">
+      <DashboardSidebar
+        displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
+        email={userProfile?.email ?? session.user.email ?? "sem-email"}
       />
 
-      {!userProfile?.nickname ? <NicknameOnboarding /> : null}
+      <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-6">
+        <DashboardHero metrics={metrics} />
 
-      <FocusMap items={focusMapItems} />
+        {!userProfile?.nickname ? <NicknameOnboarding /> : null}
 
-      <section className="grid gap-4 md:grid-cols-[1.2fr_2fr]">
-        <Card>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Criacao rapida</h2>
-          <TodoForm blocks={blocks} />
-        </Card>
+        <FocusMap items={focusMapItems} />
 
-        <Card>
-          <div className="mb-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
-              Blocos: {blocks.length}
-            </span>
-            {blocks.map((block) => (
-              <span
-                key={block.id}
-                className="rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium dark:border-zinc-700"
-              >
-                {block.name}
+        <section className="grid gap-4 md:grid-cols-[1.2fr_2fr]">
+          <Card>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Criacao rapida</h2>
+            <TodoForm blocks={blocks} />
+          </Card>
+
+          <Card>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
+                Blocos: {blocks.length}
               </span>
-            ))}
-          </div>
-          <TodoList todos={todos} blocks={blocks} />
-        </Card>
-      </section>
-    </main>
+              {blocks.map((block) => (
+                <span
+                  key={block.id}
+                  className="rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium dark:border-zinc-700"
+                >
+                  {block.name}
+                </span>
+              ))}
+            </div>
+            <TodoList todos={todos} blocks={blocks} />
+          </Card>
+        </section>
+      </main>
+    </div>
   );
 }

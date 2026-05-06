@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 
 type Metrics = {
@@ -36,9 +35,6 @@ export function DashboardHero({ metrics }: Props) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">MyTasks</h1>
         </div>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <LogoutButton />
-        </motion.div>
       </motion.header>
 
       <section className="grid gap-3 md:grid-cols-5">
