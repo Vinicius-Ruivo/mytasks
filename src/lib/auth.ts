@@ -27,8 +27,19 @@ function getAuthProviders(): NextAuthOptions["providers"] {
   }
 
   if (providers.length === 0) {
-    throw new Error(
-      "No auth providers configured. Set Google OAuth or Email provider env vars.",
+    if (process.env.NODE_ENV === "development") {
+      throw new Error(
+        "No auth providers configured. Set Google OAuth or Email provider env vars.",
+      );
+    }
+    console.warn(
+      "[auth] Nenhum provedor configurado. Defina GOOGLE_CLIENT_ID/SECRET ou EMAIL_SERVER/EMAIL_FROM na Vercel.",
+    );
+    providers.push(
+      GoogleProvider({
+        clientId: "unconfigured-client-id",
+        clientSecret: "unconfigured-client-secret",
+      }),
     );
   }
 
