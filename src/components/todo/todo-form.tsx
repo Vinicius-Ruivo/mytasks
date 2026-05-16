@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState } from "react";
+import { useTransition, useState, useMemo } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,24 @@ function SubmitButton() {
   );
 }
 
+function UseTemplateSubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" variant="secondary" className="w-full sm:w-auto sm:min-w-[220px]" disabled={disabled || pending}>
+      {pending ? "Gerando..." : "Gerar tarefa"}
+    </Button>
+  );
+}
+
+function SaveTemplateSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" variant="secondary" className="w-full" disabled={pending}>
+      {pending ? "Salvando modelo..." : "Salvar modelo"}
+    </Button>
+  );
+}
+
 type Block = {
   id: string;
   name: string;
@@ -29,6 +47,15 @@ type Template = {
   id: string;
   name: string;
 };
+
+type TodoPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+const PRIORITY_OPTIONS: { value: TodoPriority; label: string }[] = [
+  { value: "LOW", label: "Baixa" },
+  { value: "MEDIUM", label: "Media" },
+  { value: "HIGH", label: "Alta" },
+  { value: "URGENT", label: "Urgente" },
+];
 
 function blockAccent(color: string | null | undefined) {
   if (!color || !/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color.trim())) return undefined;
@@ -70,7 +97,17 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
   const router = useRouter();
   const [taskAreaId, setTaskAreaId] = useState("");
   const [templateAreaId, setTemplateAreaId] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [newTemplatePriority, setNewTemplatePriority] = useState<TodoPriority>("MEDIUM");
   const [createAreaOpen, setCreateAreaOpen] = useState(false);
+
+  const effectiveTemplateId = useMemo(() => {
+    if (templates.length === 0) return "";
+    if (selectedTemplateId && templates.some((t) => t.id === selectedTemplateId)) {
+      return selectedTemplateId;
+    }
+    return templates[0].id;
+  }, [templates, selectedTemplateId]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }} className="space-y-4">
@@ -216,40 +253,51 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
       </form>
 
       <motion.form
-        className="mt-5 space-y-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
+        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, delay: 0.04 }}
-        action={(formData) => {
-          const templateId = String(formData.get("templateId") ?? "");
+        action={() => {
+          const templateId = effectiveTemplateId;
           const blockId = templateAreaId === "" ? null : templateAreaId;
           if (!templateId) return;
           startTransition(async () => {
             await createTodoFromTemplate({ templateId, blockId });
+            router.refresh();
           });
         }}
       >
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Usar template</p>
-        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <select
-            name="templateId"
-            className="h-10 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-            defaultValue=""
-            required
-          >
-            <option value="">Selecione um template</option>
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-          <Button type="submit" variant="secondary">
-            Criar por template
-          </Button>
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Usar modelo</p>
+          <p className="text-[13px] text-zinc-600 dark:text-zinc-400">
+            Toque no modelo e escolha a area. Uma nova tarefa e criada com titulo, prioridade e checklist padrao do modelo.
+          </p>
         </div>
-        <div className="space-y-2">
-          <p className="text-[11px] uppercase text-zinc-500">Area para esta tarefa</p>
+
+        {templates.length === 0 ? (
+          <p className="mt-3 rounded-lg border border-dashed border-zinc-300 px-3 py-4 text-sm text-zinc-500 dark:border-zinc-600">
+            Nenhum modelo ainda. Use &quot;Salvar modelo&quot; abaixo para guardar um fluxo que voce repete.
+          </p>
+        ) : (
+          <div className="mt-3 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {templates.map((template) => (
+              <Button
+                key={template.id}
+                type="button"
+                size="sm"
+                variant={effectiveTemplateId === template.id ? "default" : "outline"}
+                className="shrink-0 rounded-full px-3"
+                aria-pressed={effectiveTemplateId === template.id}
+                onClick={() => setSelectedTemplateId(template.id)}
+              >
+                {template.name}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500">Area da nova tarefa</p>
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             <BlockChip label="Sem area" selected={templateAreaId === ""} onClick={() => setTemplateAreaId("")} />
             {blocks.map((block) => (
@@ -263,10 +311,14 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
             ))}
           </div>
         </div>
+
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <UseTemplateSubmitButton disabled={templates.length === 0 || effectiveTemplateId === ""} />
+        </div>
       </motion.form>
 
       <motion.form
-        className="mt-5 space-y-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
+        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, delay: 0.06 }}
@@ -276,12 +328,7 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           const description = String(formData.get("templateDescription") ?? "");
           const subtasksRaw = String(formData.get("templateSubtasks") ?? "");
           const checklistRaw = String(formData.get("templateChecklist") ?? "");
-          const priorityRaw = String(formData.get("templatePriority") ?? "MEDIUM");
-          const priority = (["LOW", "MEDIUM", "HIGH", "URGENT"].includes(priorityRaw) ? priorityRaw : "MEDIUM") as
-            | "LOW"
-            | "MEDIUM"
-            | "HIGH"
-            | "URGENT";
+          const priority = newTemplatePriority;
           const subtasks = subtasksRaw
             .split("\n")
             .map((line) => line.trim())
@@ -294,44 +341,99 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
             .slice(0, 40);
           startTransition(async () => {
             await createTemplate({ name, title, description: description || null, priority, subtasks, checklist });
+            router.refresh();
           });
         }}
       >
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Salvar template</p>
-        <div className="grid gap-3 md:grid-cols-2">
-          <Input name="templateName" maxLength={40} placeholder="Nome do template (ex: Daily Deep Work)" required />
-          <Input name="templateTitle" maxLength={120} placeholder="Titulo da tarefa" required />
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Salvar modelo</p>
+          <p className="text-[13px] text-zinc-600 dark:text-zinc-400">
+            Guarde um jeito de trabalhar que voce repete: nome amigavel, titulo que a tarefa vai usar e opcionalmente subtarefas/checklist por linha.
+          </p>
         </div>
-        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <Input name="templateDescription" maxLength={500} placeholder="Descricao opcional" />
-          <select
-            name="templatePriority"
-            className="h-10 rounded-md border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-            defaultValue="MEDIUM"
-          >
-            <option value="LOW">Baixa</option>
-            <option value="MEDIUM">Media</option>
-            <option value="HIGH">Alta</option>
-            <option value="URGENT">Urgente</option>
-          </select>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="templateName" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Nome do modelo (lista)
+            </label>
+            <Input
+              id="templateName"
+              name="templateName"
+              maxLength={40}
+              placeholder="Ex: Review semanal, Sprint planning"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="templateTitle" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Titulo da tarefa gerada
+            </label>
+            <Input id="templateTitle" name="templateTitle" maxLength={120} placeholder="Ex: Revisar backlog do time" required />
+          </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          <textarea
-            name="templateSubtasks"
-            className="min-h-24 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-            placeholder={"Subtarefas padrao (1 por linha)\nEx:\nPreparar contexto\nExecutar foco de 60min"}
-            maxLength={4000}
+
+        <div className="mt-4 space-y-1.5">
+          <label htmlFor="templateDescription" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+            Descricao padrao (opcional)
+          </label>
+          <Input
+            id="templateDescription"
+            name="templateDescription"
+            maxLength={500}
+            placeholder="Contexto que sempre vale para este modelo"
           />
-          <textarea
-            name="templateChecklist"
-            className="min-h-24 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-            placeholder={"Checklist padrao (1 por linha)\nEx:\nAmbiente pronto\nEntregavel revisado"}
-            maxLength={4000}
-          />
         </div>
-        <Button type="submit" variant="secondary">
-          Salvar template
-        </Button>
+
+        <div className="mt-4 space-y-2">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Prioridade padrao</p>
+          <div className="flex flex-wrap gap-2">
+            {PRIORITY_OPTIONS.map((opt) => (
+              <Button
+                key={opt.value}
+                type="button"
+                size="sm"
+                variant={newTemplatePriority === opt.value ? "default" : "outline"}
+                className="rounded-full px-3"
+                aria-pressed={newTemplatePriority === opt.value}
+                onClick={() => setNewTemplatePriority(opt.value)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="templateSubtasks" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Subtarefas padrao (uma por linha)
+            </label>
+            <textarea
+              id="templateSubtasks"
+              name="templateSubtasks"
+              className="min-h-[100px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+              placeholder={"Preparar contexto\nExecutar foco de 60 min"}
+              maxLength={4000}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="templateChecklist" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Checklist padrao (uma por linha)
+            </label>
+            <textarea
+              id="templateChecklist"
+              name="templateChecklist"
+              className="min-h-[100px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+              placeholder={"Ambiente organizado\nEntregavel revisado"}
+              maxLength={4000}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <SaveTemplateSubmitButton />
+        </div>
       </motion.form>
     </motion.div>
   );
