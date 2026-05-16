@@ -66,6 +66,7 @@ export default async function DashboardPage() {
     select: {
       id: true,
       name: true,
+      color: true,
     },
   });
 
