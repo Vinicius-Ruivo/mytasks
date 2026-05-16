@@ -50,12 +50,20 @@ const priorityOrder: Record<Todo["priority"], number> = {
 
 export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: string; name: string }[] }) {
   const [view, setView] = useState<"TODAY" | "OVERDUE" | "UPCOMING" | "ALL">("TODAY");
+  /** null = todos os blocos */
+  const [blockFilter, setBlockFilter] = useState<string | null>(null);
 
   const filteredTodos = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const list = todos.filter((todo) => {
+    let list = todos;
+
+    if (blockFilter !== null) {
+      list = list.filter((todo) => todo.block?.id === blockFilter);
+    }
+
+    list = list.filter((todo) => {
       if (!todo.dueDate) {
         return view === "ALL";
       }
@@ -73,7 +81,7 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
       if (dueA !== dueB) return dueA - dueB;
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-  }, [todos, view]);
+  }, [todos, view, blockFilter]);
 
   const handleToggle = async (todo: Todo) => {
     const nextStatus = todo.status === "COMPLETED" ? "PENDING" : "COMPLETED";
@@ -96,23 +104,60 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
   return (
     <AnimatePresence mode="popLayout">
       <div className="grid gap-3">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { id: "TODAY", label: "Hoje" },
-            { id: "OVERDUE", label: "Atrasadas" },
-            { id: "UPCOMING", label: "Proximas" },
-            { id: "ALL", label: "Todas" },
-          ].map((tab) => (
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
+              Blocos: {blocks.length}
+            </span>
             <Button
-              key={tab.id}
               size="sm"
-              variant={view === tab.id ? "default" : "outline"}
-              onClick={() => setView(tab.id as "TODAY" | "OVERDUE" | "UPCOMING" | "ALL")}
+              variant={blockFilter === null ? "default" : "outline"}
+              className="rounded-full"
+              aria-pressed={blockFilter === null}
+              onClick={() => setBlockFilter(null)}
             >
-              {tab.label}
+              Todos
             </Button>
-          ))}
+            {blocks.map((block) => (
+              <Button
+                key={block.id}
+                size="sm"
+                variant={blockFilter === block.id ? "default" : "outline"}
+                className="rounded-full"
+                aria-pressed={blockFilter === block.id}
+                onClick={() => setBlockFilter(block.id)}
+              >
+                {block.name}
+              </Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+            {[
+              { id: "TODAY", label: "Hoje" },
+              { id: "OVERDUE", label: "Atrasadas" },
+              { id: "UPCOMING", label: "Proximas" },
+              { id: "ALL", label: "Todas" },
+            ].map((tab) => (
+              <Button
+                key={tab.id}
+                size="sm"
+                variant={view === tab.id ? "default" : "outline"}
+                className="rounded-full"
+                aria-pressed={view === tab.id}
+                onClick={() => setView(tab.id as "TODAY" | "OVERDUE" | "UPCOMING" | "ALL")}
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
         </div>
+
+        {filteredTodos.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-8 text-center text-sm text-zinc-500 dark:border-zinc-700">
+            Nenhuma tarefa com os filtros atuais. Ajuste o bloco ou a visao (Hoje, Atrasadas…).
+          </p>
+        ) : null}
+
         {filteredTodos.map((todo) => (
           <motion.div
             key={todo.id}

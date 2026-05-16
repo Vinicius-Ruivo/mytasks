@@ -129,19 +129,6 @@ export default async function DashboardPage() {
           </Card>
 
           <Card>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
-                Blocos: {blocks.length}
-              </span>
-              {blocks.map((block) => (
-                <span
-                  key={block.id}
-                  className="rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium dark:border-zinc-700"
-                >
-                  {block.name}
-                </span>
-              ))}
-            </div>
             <TodoList todos={todos} blocks={blocks} />
           </Card>
         </section>
