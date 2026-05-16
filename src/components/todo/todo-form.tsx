@@ -213,47 +213,49 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
       >
         <input type="hidden" name="blockId" value={taskAreaId} />
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Titulo da tarefa</label>
-          <Input required minLength={1} maxLength={120} name="title" placeholder="Ex: Revisar proposta" />
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="max-w-xl space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Prioridade</label>
-            <select
-              name="priority"
-              className="h-10 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              defaultValue="MEDIUM"
-            >
-              <option value="LOW">Baixa</option>
-              <option value="MEDIUM">Media</option>
-              <option value="HIGH">Alta</option>
-              <option value="URGENT">Urgente</option>
-            </select>
+            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Titulo da tarefa</label>
+            <Input required minLength={1} maxLength={120} name="title" placeholder="Ex: Revisar proposta" />
           </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Prioridade</label>
+              <select
+                name="priority"
+                className="h-10 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                defaultValue="MEDIUM"
+              >
+                <option value="LOW">Baixa</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HIGH">Alta</option>
+                <option value="URGENT">Urgente</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Vencimento</label>
+              <Input type="date" name="dueDate" />
+            </div>
+          </div>
+
           <div className="space-y-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Vencimento</label>
-            <Input type="date" name="dueDate" />
+            <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Descricao (opcional)</label>
+            <Input name="description" maxLength={500} placeholder="Detalhes relevantes para executar melhor a tarefa" />
           </div>
-        </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">Descricao (opcional)</label>
-          <Input name="description" maxLength={500} placeholder="Detalhes relevantes para executar melhor a tarefa" />
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="isExtraMile" />
-            Marcar como extra mile
-          </label>
-          <SubmitButton />
+          <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="isExtraMile" />
+              Marcar como extra mile
+            </label>
+            <SubmitButton />
+          </div>
         </div>
       </form>
 
       <motion.form
-        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 md:p-5 dark:border-zinc-800 dark:bg-zinc-900/40"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, delay: 0.04 }}
@@ -318,7 +320,7 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
       </motion.form>
 
       <motion.form
-        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+        className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 md:p-5 dark:border-zinc-800 dark:bg-zinc-900/40"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, delay: 0.06 }}
@@ -352,7 +354,8 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           </p>
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mx-auto mt-4 max-w-2xl space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="templateName" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
               Nome do modelo (lista)
@@ -373,7 +376,7 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           </div>
         </div>
 
-        <div className="mt-4 space-y-1.5">
+        <div className="space-y-1.5">
           <label htmlFor="templateDescription" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
             Descricao padrao (opcional)
           </label>
@@ -385,7 +388,7 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           />
         </div>
 
-        <div className="mt-4 space-y-2">
+        <div className="space-y-2">
           <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Prioridade padrao</p>
           <div className="flex flex-wrap gap-2">
             {PRIORITY_OPTIONS.map((opt) => (
@@ -404,7 +407,7 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="templateSubtasks" className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
               Subtarefas padrao (uma por linha)
@@ -430,8 +433,9 @@ export function TodoForm({ blocks, templates }: { blocks: Block[]; templates: Te
             />
           </div>
         </div>
+        </div>
 
-        <div className="mt-4">
+        <div className="mx-auto mt-4 max-w-2xl">
           <SaveTemplateSubmitButton />
         </div>
       </motion.form>

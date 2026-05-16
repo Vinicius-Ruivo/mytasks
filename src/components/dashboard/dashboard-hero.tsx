@@ -25,19 +25,18 @@ const metricCards = [
 
 export function DashboardHero({ metrics }: Props) {
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <motion.header
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80"
+        className="rounded-2xl border border-zinc-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85"
       >
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">MyTasks</h1>
-        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">MyTasks</h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Resumo rapido do que esta em movimento.</p>
       </motion.header>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {metricCards.map((item, index) => (
           <motion.div
             key={item.key}
@@ -45,14 +44,15 @@ export function DashboardHero({ metrics }: Props) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, delay: index * 0.04 }}
             whileHover={{ y: -2 }}
+            className="min-w-0"
           >
-            <Card className={`border-l-4 ${item.color}`}>
-              <p className="text-[11px] uppercase text-zinc-500 sm:text-xs">{item.label}</p>
-              <p className="text-xl font-bold sm:text-2xl">{metrics[item.key]}</p>
+            <Card className={`border-l-4 ${item.color} p-4`}>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-500">{item.label}</p>
+              <p className="mt-1 tabular-nums text-xl font-bold tracking-tight lg:text-2xl">{metrics[item.key]}</p>
             </Card>
           </motion.div>
         ))}
       </section>
-    </>
+    </div>
   );
 }

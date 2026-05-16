@@ -112,27 +112,29 @@ export default async function DashboardPage() {
         email={userProfile?.email ?? session.user.email ?? "sem-email"}
       />
 
-      <main className="flex min-h-screen min-w-0 flex-1 flex-col gap-4 p-3 sm:p-4 md:p-6 xl:p-8">
-        <DashboardMobileControls
-          displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
-          email={userProfile?.email ?? session.user.email ?? "sem-email"}
-        />
-        <DashboardHero metrics={metrics} />
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col bg-zinc-50/70 dark:bg-zinc-950/80">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:gap-10 lg:py-10">
+          <DashboardMobileControls
+            displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
+            email={userProfile?.email ?? session.user.email ?? "sem-email"}
+          />
+          <DashboardHero metrics={metrics} />
 
-        {!userProfile?.nickname ? <NicknameOnboarding /> : null}
+          {!userProfile?.nickname ? <NicknameOnboarding /> : null}
 
-        <FocusMap items={focusMapItems} />
+          <FocusMap items={focusMapItems} />
 
-        <section className="grid gap-4 md:grid-cols-[1.2fr_2fr]">
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Criacao rapida</h2>
-            <TodoForm blocks={blocks} templates={templates} />
-          </Card>
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-8 xl:items-start">
+            <Card className="p-5 md:p-6">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">Criacao rapida</h2>
+              <TodoForm blocks={blocks} templates={templates} />
+            </Card>
 
-          <Card>
-            <TodoList todos={todos} blocks={blocks} />
-          </Card>
-        </section>
+            <Card className="p-5 md:p-6">
+              <TodoList todos={todos} blocks={blocks} />
+            </Card>
+          </section>
+        </div>
       </main>
     </div>
   );

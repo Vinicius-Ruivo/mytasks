@@ -103,7 +103,7 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
 
   return (
     <AnimatePresence mode="popLayout">
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
@@ -171,12 +171,12 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
             <Card
               className={
                 todo.isExtraMile
-                  ? "bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-cyan-500/10 border-indigo-300/40 dark:border-indigo-500/30"
-                  : ""
+                  ? "border-indigo-300/40 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-cyan-500/10 p-5 dark:border-indigo-500/30"
+                  : "p-5"
               }
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 max-w-prose">
                   <p className="font-semibold">{todo.title}</p>
                   <p className="text-xs text-zinc-500 mt-1">
                     Prioridade: {priorityLabel[todo.priority]}
@@ -232,11 +232,11 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 </Button>
               </div>
 
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="mt-4 grid gap-4 xl:grid-cols-2">
                 <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Subtarefas</p>
                   <form
-                    className="mb-2 flex gap-2"
+                    className="mb-2 flex max-w-md flex-col gap-2 sm:flex-row"
                     action={(formData) => {
                       const title = String(formData.get(`subtask-${todo.id}`) ?? "");
                       void createSubtask({ parentId: todo.id, title });
@@ -281,7 +281,7 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Checklist</p>
                   <form
-                    className="mb-2 flex gap-2"
+                    className="mb-2 flex max-w-md flex-col gap-2 sm:flex-row"
                     action={(formData) => {
                       const content = String(formData.get(`check-${todo.id}`) ?? "");
                       void createChecklistItem({ todoId: todo.id, content });
@@ -317,10 +317,10 @@ export function TodoList({ todos, blocks }: { todos: Todo[]; blocks: { id: strin
                 </div>
               </div>
 
-              <div className="mt-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+              <div className="mt-4 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Anotacoes</p>
                 <form
-                  className="mb-2 flex gap-2"
+                  className="mb-2 flex max-w-md flex-col gap-2 sm:flex-row"
                   action={(formData) => {
                     const content = String(formData.get(`note-${todo.id}`) ?? "");
                     void createTodoNote({ todoId: todo.id, content });
