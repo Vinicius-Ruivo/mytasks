@@ -18,7 +18,7 @@ export function DashboardSidebar({ displayName, email }: Props) {
   const { setTheme, theme } = useTheme();
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-full max-w-[270px] flex-col justify-between border-r border-zinc-200 bg-white/80 p-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-[min(100%,270px)] shrink-0 flex-col justify-between border-r border-zinc-200 bg-white/80 p-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70 md:flex">
       <div className="space-y-3">
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
           <p className="text-xs uppercase text-zinc-500">Workspace</p>

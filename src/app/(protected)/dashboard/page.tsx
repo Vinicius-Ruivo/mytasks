@@ -105,13 +105,13 @@ export default async function DashboardPage() {
     .sort((a, b) => b.completed - a.completed || b.total - a.total);
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col md:flex-row">
+    <div className="flex min-h-screen w-full flex-col md:flex-row">
       <DashboardSidebar
         displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
         email={userProfile?.email ?? session.user.email ?? "sem-email"}
       />
 
-      <main className="flex min-h-screen w-full flex-col gap-4 p-3 sm:p-4 md:p-6">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col gap-4 p-3 sm:p-4 md:p-6 xl:p-8">
         <DashboardMobileControls
           displayName={userProfile?.nickname ?? userProfile?.name ?? "Usuario"}
           email={userProfile?.email ?? session.user.email ?? "sem-email"}
